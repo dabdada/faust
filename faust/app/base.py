@@ -912,7 +912,8 @@ class App(AppT, Service):
         if self._consumer:
             try:
                 await self._consumer.on_task_error(exc)
-            except MemoryError:
+            except MemoryError as exc:
+                logger.exception("############### agent error OOM", exc_info=exc)
                 raise
             except Exception as exc:
                 self.log.exception("Consumer error callback raised: %r", exc)

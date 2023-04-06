@@ -228,7 +228,8 @@ class PartitionAssignor(AbstractPartitionAssignor, PartitionAssignorT):  # type:
         sensor_state = self.app.sensors.on_assignment_start(self)
         try:
             assignment = self._perform_assignment(cluster, member_metadata)
-        except MemoryError:
+        except MemoryError as exc:
+            logger.exception("############### PartitionAssignor OOM", exc_info=exc)
             raise
         except Exception as exc:
             self.app.sensors.on_assignment_error(self, sensor_state, exc)

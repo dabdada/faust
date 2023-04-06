@@ -1,4 +1,5 @@
 """Registry of supported codecs (serializers, compressors, etc.)."""
+import logging
 import sys
 from decimal import Decimal
 from typing import Any, Optional, Tuple, Type, cast
@@ -15,6 +16,8 @@ from .codecs import CodecArg, dumps, loads
 __all__ = ["Registry"]
 
 IsInstanceArg = Tuple[Type, ...]
+
+logger = logging.getLogger(__name__)
 
 
 class Registry(RegistryT):
@@ -55,7 +58,8 @@ class Registry(RegistryT):
         try:
             payload = self._loads(serializer, key)
             return cast(K, self._prepare_payload(typ, payload))
-        except MemoryError:
+        except MemoryError as exc:
+            logger.exception("############### Registry key OOM", exc_info=exc)
             raise
         except Exception as exc:
             raise KeyDecodeError(str(exc)).with_traceback(sys.exc_info()[2]) from exc
@@ -99,7 +103,8 @@ class Registry(RegistryT):
         try:
             payload = self._loads(serializer, value)
             return cast(V, self._prepare_payload(typ, payload))
-        except MemoryError:
+        except MemoryError as exc:
+            logger.exception("############### Registry value OOM", exc_info=exc)
             raise
         except Exception as exc:
             raise ValueDecodeError(str(exc)).with_traceback(sys.exc_info()[2]) from exc
