@@ -1092,6 +1092,9 @@ class Consumer(Service, ConsumerT):
         if acked:
             max_offset = max(acked)
             gap_for_tp: IntervalTree = self._gap[tp]
+            logger.info(
+                "######## gaps for tp: %s, %s, %s", tp.topic, gap_for_tp, max_offset
+            )
             if gap_for_tp:
                 # find all the ranges up to the max of acked, add them in to acked,
                 # and chop them off the gap.
@@ -1106,6 +1109,7 @@ class Consumer(Service, ConsumerT):
                         stuff_to_add.extend(range(entry.begin, entry.end))
                     new_max_offset = max(stuff_to_add[-1], max_offset + 1)
                     acked.extend(stuff_to_add)
+                    logger.info("acked gaps for topic %s", tp.topic)
                     gap_for_tp.chop(0, new_max_offset)
             acked.sort()
 
